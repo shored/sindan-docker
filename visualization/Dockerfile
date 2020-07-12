@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM ruby:2.6.3-alpine as builder
+FROM ruby:2.6.3 as builder
 LABEL maintainer "mi2428 <tmiya@protonmail.ch>"
 
 ARG BUILDTIME_RAILS_SECRETKEY_FILE
@@ -20,10 +20,14 @@ COPY seeds.rb db
 COPY bundle-install.sh .
 
 # hadolint ignore=DL3018,DL3028
-RUN apk add --no-cache --update \
-      build-base  alpine-sdk tzdata shadow sudo ca-certificates bash \
-      nodejs busybox-suid mariadb-dev mariadb-connector-c-dev libxml2-dev libxslt-dev libstdc++ \
+#RUN apk add --no-cache --update \
+#      build-base  alpine-sdk tzdata shadow sudo ca-certificates bash \
+#      nodejs busybox-suid mariadb-dev mariadb-connector-c-dev libxml2-dev libxslt-dev libstdc++ \
+RUN apt-get update \
+ && apt-get install -y build-essential tzdata bash ca-certificates nodejs busybox libmariadb-dev libxml2-dev libxslt-dev \
  && gem install bundler --no-document \
+ && bundle update bcrypt \
+ && bundle install --no-deployment \
  && bundle config build.nokogiri --use-system-libraries \
  && bash bundle-install.sh
 
@@ -32,7 +36,7 @@ RUN --mount=type=secret,id=rails_secret,target=/run/secrets/rails_secret_key_bas
     --mount=type=secret,id=db_pass,target=/run/secrets/db_password,required \
     bundle exec rails assets:precompile
 
-FROM ruby:2.6.3-alpine as production
+FROM ruby:2.6.3 as production
 LABEL maintainer "mi2428 <tmiya@protonmail.ch>"
 
 ENV LANG C.UTF-8
@@ -48,8 +52,10 @@ COPY secrets.yml config
 COPY seeds.rb db
 
 # hadolint ignore=DL3018,DL3028
-RUN apk add --no-cache --update \
-      libxml2-dev libxslt-dev libstdc++ tzdata nodejs mariadb-connector-c ca-certificates
+#RUN apk add --no-cache --update \
+#      libxml2-dev libxslt-dev libstdc++ tzdata nodejs mariadb-connector-c ca-certificates
+RUN apt-get update \
+ && apt-get install -y tzdata bash ca-certificates nodejs busybox libmariadb-dev libxml2-dev libxslt-dev 
 
 COPY --from=builder /app/vendor/bundle vendor/bundle
 COPY --from=builder /usr/local/bundle /usr/local/bundle
