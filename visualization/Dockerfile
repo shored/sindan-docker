@@ -26,8 +26,8 @@ COPY bundle-install.sh .
 RUN apt-get update \
  && apt-get install -y build-essential tzdata bash ca-certificates nodejs busybox libmariadb-dev libxml2-dev libxslt-dev \
  && gem install bundler --no-document \
- && bundle update bcrypt \
- && bundle install --no-deployment \
+# && bundle update bcrypt \
+# && bundle install --no-deployment \
  && bundle config build.nokogiri --use-system-libraries \
  && bash bundle-install.sh
 

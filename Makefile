@@ -1,7 +1,7 @@
 BUILDKIT_DOCKER_BUILD    = DOCKER_BUILDKIT=1 docker build
-SINDAN_FLUENTD_TAG       = sindan/fluentd:v1.6-1-rev1
-SINDAN_VISUALIZATION_TAG = sindan/visualization:2.6.3
-SINDAN_GRAFANA_TAG       = sindan/grafana:6.5.0-rev1
+SINDAN_FLUENTD_TAG       = sindan/fluentd:v1.6-1-rev1-rpi
+SINDAN_VISUALIZATION_TAG = sindan/visualization:2.6.3-rpi
+SINDAN_GRAFANA_TAG       = sindan/grafana:6.5.0-rev1-rpi
 
 .PHONY: all
 all: run
@@ -41,7 +41,7 @@ init:
 	docker-compose up -d mysql
 	bash -c \
 	'while true; do \
-		COMPOSE_DOCKER_CLI_BUILD=1 docker-compose run visualization bundle exec rails db:migrate; \
+		docker-compose run visualization bundle exec rails db:migrate; \
 		(( $$? == 0 )) && break; \
 		echo -e "\n\nRetrying in 5 seconds ..."; sleep 5; echo; \
 	done'
